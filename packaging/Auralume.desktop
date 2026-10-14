@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Auralume
+Comment=Your Music, Your Way
+Exec=Auralume
+Icon=auralume
+Terminal=false
+Categories=AudioVideo;Audio;Player;
+StartupNotify=true

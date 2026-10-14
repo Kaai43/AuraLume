@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "auralume"
+version = "0.1.0"
+description = "Your Music, Your Way — player local sem login"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.12"
+dependencies = ["PySide6>=6.8,<7", "mpv>=1.0.7,<2", "mutagen>=1.47,<2", "yt-dlp>=2026.8.19"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pyinstaller>=6.20"]
+
+[project.scripts]
+auralume = "auralume.app:main"
+
+[tool.setuptools.packages.find]
+include = ["auralume*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["integration: real media/Qt integration"]
