@@ -42,3 +42,12 @@ AGENTS.md.backup
 *.tmp
 *.bak
 .DS_Store
+
+
+# AppImage
+AppDir/
+*.AppImage
+
+# Pacotes de distribuição
+Auralume-*.tar.gz
+Auralume-*-windows-*.zip
