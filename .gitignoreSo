@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Builds
+build/
+dist/
+*.spec
+
+# Bancos de dados locais
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Segredos
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Arquivos pessoais do Codex
+AGENTS.md
+AGENTS.md.backup
+.codex/
+
+# Engenharia reversa
+*.sfc
+*.smc
+
+# Arquivos temporarios
+*.tmp
+*.bak
+.DS_Store

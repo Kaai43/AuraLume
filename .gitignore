@@ -1,13 +1,44 @@
-.venv/
+# Python
 __pycache__/
 *.py[cod]
+*.pyo
+.venv/
+venv/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Builds
 build/
 dist/
-*.egg-info/
-*.sqlite3*
-.local-data/
+*.spec
+
+# Bancos de dados locais
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Segredos
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Arquivos pessoais do Codex
+AGENTS.md
+AGENTS.md.backup
 .codex/
-.aws/
-.agents/
-build-*.log
+
+# Engenharia reversa
+*.sfc
+*.smc
+
+# Arquivos temporarios
+*.tmp
+*.bak
+.DS_Store
