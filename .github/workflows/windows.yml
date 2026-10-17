@@ -51,14 +51,30 @@ jobs:
       - name: Load DLL and create actual playback engine
         run: python -m auralume --diagnostics > build/evidence/source-diagnostics.json
 
+      - name: Check script isolation and repeated native player lifecycle
+        run: |
+          python -X faulthandler -m pytest -vv -ra tests/test_mpv_scripts.py --junitxml=build/evidence/mpv-lifecycle.xml 2>&1 | Tee-Object -FilePath build/evidence/mpv-lifecycle.log
+          exit $LASTEXITCODE
+
       - name: Run complete suite including real libmpv integrations
-        run: python -m pytest -q --junitxml=build/evidence/pytest-windows.xml
+        run: |
+          python -X faulthandler -m pytest -vv -ra --junitxml=build/evidence/pytest-windows.xml 2>&1 | Tee-Object -FilePath build/evidence/pytest-windows.log
+          exit $LASTEXITCODE
 
       - name: Build onedir with bundled DLLs
         run: python -m PyInstaller --noconfirm --clean Auralume.spec
 
       - name: Package and verify extracted EXE with generated WAV MP3 FLAC
         run: python scripts/verify_windows.py --revision $env:GITHUB_SHA --ffmpeg .tools/windows-native/ffmpeg.exe
+
+      - name: Preserve diagnostic evidence even when native tests abort
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: Auralume-windows-diagnostics-${{ github.sha }}
+          path: build/evidence/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload candidate for review (no GitHub Release)
         if: ${{ inputs.upload_candidate }}

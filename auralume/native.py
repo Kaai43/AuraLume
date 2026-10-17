@@ -22,6 +22,29 @@ def _is_windows():
     return sys.platform == 'win32'
 
 
+# Every builtin Lua entry point compiled into the pinned Windows libmpv build.
+# Verified statically in libmpv-2.dll (LuaJIT 2.1) : auto_profiles, commands,
+# console, context_menu, osc, positioning, select, stats and ytdl_hook.
+_LUA_SCRIPTS = ('osc', 'ytdl', 'load_scripts', 'load_stats_overlay', 'load_console',
+                'load_auto_profiles', 'load_select', 'load_positioning',
+                'load_commands', 'load_context_menu')
+
+
+def mpv_script_options() -> dict:
+    """Disable every Lua client before initializing the pinned Windows engine.
+
+    ``config=no``, ``osc=no``, ``ytdl=no`` and even ``load-scripts=no`` leave
+    most builtin scripts active. Running any of them initializes LuaJIT, whose
+    Windows x64 SEH code (``0xe24c4a02``) escapes into the embedding Python
+    process and ends in an access violation when libmpv runs on its event
+    thread. Disabling all entry points keeps Lua out of the process entirely.
+    Linux keeps its existing options (older distro mpv may lack these switches).
+    """
+    if not _is_windows():
+        return {}
+    return {option: False for option in _LUA_SCRIPTS}
+
+
 def windows_library_path() -> Path:
     if getattr(sys, 'frozen', False):
         root = Path(sys._MEIPASS) / 'native'
@@ -110,9 +133,11 @@ def probe_mpv() -> dict:
         report.update(loaded=True, path=str(binding.backend._name))
         if _is_windows():
             report['loaded_dependencies']['vulkan-1.dll'] = loaded_windows_module('vulkan-1.dll')
-        engine = binding.MPV(ao='null', video=False, audio_display='no', config=False,
-                             ytdl=False, terminal=False, input_default_bindings=False,
-                             input_vo_keyboard=False, osc=False)
+        options = dict(ao='null', video=False, audio_display='no', config=False,
+                       ytdl=False, terminal=False, input_default_bindings=False,
+                       input_vo_keyboard=False, osc=False)
+        options.update(mpv_script_options())
+        engine = binding.MPV(**options)
         report.update(engine_created=True, version=engine.mpv_version)
     except Exception as error:
         report['error'] = f'{type(error).__name__}: {error}'

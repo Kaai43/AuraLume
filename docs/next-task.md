@@ -2,13 +2,13 @@
 
 A missão Windows substitui as prioridades históricas abaixo. Trabalhar com um único agente; não restaurar workflow multiagente, retomar mobile ou desenvolver temas.
 
-1. Ler `docs/windows-build.md` e revisar o patch Windows isolado em `dist/windows-review/`.
+1. Ler a investigação da exceção nativa no início de `docs/windows-build.md`. Causa: LuaJIT + scripts embutidos na DLL fixada. O patch isolado antigo em `dist/windows-review/` não inclui esta correção.
 2. Em 17/10/2026, o usuário autorizou enviar os fontes atuais para `main`, incluindo os trabalhos existentes, excluindo AGENTS.md, Registros e pacotes de distribuição. A validação Windows será acionada manualmente pelo usuário: Actions → Auralume Windows candidate → Run workflow, com `upload_candidate=false` enquanto a revisão de licenças estiver pendente.
-3. Conferir build nativo do Vulkan Loader, criação real do engine, suíte inteira, onedir e testes do ZIP extraído. Corrigir eventuais falhas reais; não declarar Windows validado antes disso.
+3. Conferir primeiro os testes de scripts/ciclos do player e depois a suíte inteira, onedir e ZIP. Se persistir access violation **sem nenhuma linha LuaJIT no log**, seguir o plano B (build `-Dlua=disabled`) e coletar a pilha nativa antes de outra alteração. Não declarar Windows validado antes disso.
 4. Concluir inventário/licenças/fontes correspondentes de libmpv/FFmpeg/Qt antes de habilitar upload de binários. Depois, obter autorização específica para disponibilizar o candidato.
 5. Testar em Windows 10/11 limpo, áudio audível, dispositivos e SmartScreen; revisar o rascunho `docs/windows-release-notes.md`. Publicação exige outra aprovação explícita.
 
-Última regressão da árvore principal: `124 passed` no Linux; cópia isolada Windows: `75 passed` no Linux (17/10/2026). Os detalhes e evidências estão em `docs/evidence/windows/`. O usuário solicitou agora o registro local das mudanças; ele permanece ignorado pelo Git. Tags e releases continuam sem autorização. A existência dos fontes mobile não significa que o aplicativo mobile esteja pronto.
+Última regressão: `130 passed`, 0 falhas/ignorados no Linux (17/10/2026), incluindo regressões da inicialização/ciclo de vida nativo e da cobertura das opções Lua. O registro local permanece ignorado pelo Git. Tags e releases continuam sem autorização. A existência dos fontes mobile não significa que o aplicativo mobile esteja pronto.
 
 ## Registro histórico anterior (não executar como prioridade atual)
 

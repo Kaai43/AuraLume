@@ -2,6 +2,31 @@
 
 ## Missão atual
 
+### 17/10/2026 — exceção nativa após o primeiro push
+
+**VERIFICADO:** [job 117405871883](https://github.com/Kaai43/AuraLume/actions/runs/39036034661/job/117405871883), HEAD `3f06a241ee3f732d32dea31e6fad24d306d355d8`: dependências, carregamento da DLL e criação do motor passaram. A suíte abortou com exit code 1, mensagens `0xe24c4a02` e finalmente `access violation`, sem contagem final nem EXE/ZIP. Log consultado integralmente, cópia local: `/tmp/auralume-windows-native-crash.log`.
+
+A DLL fixada (`libmpv-2.dll`, cópia auditada em `.tools/windows-native/audited/`) contém **LuaJIT 2.1** e nove scripts Lua embutidos — `osc`, `ytdl_hook`, `stats`, `console`, `auto_profiles`, `select`, `positioning`, `commands`, `context_menu` — confirmado por inspeção estática das strings do binário real. `config=no`, `osc=no` e `ytdl=no` desligam apenas parte deles; os restantes inicializam LuaJIT, cujo SEH x64 `0xe24c4a02` escapa para o processo Python embutido e termina em access violation na thread de eventos do libmpv.
+
+**Correção implementada:** `native.mpv_script_options()` desativa **todos** os pontos de entrada Lua (as nove opções `osc`/`ytdl`/`load-*` e a descoberta de scripts externos) antes de inicializar o motor, no player e no diagnóstico. Sem nenhum script carregado, o LuaJIT não é inicializado e o SEH `0xe24c4a02` não pode disparar. O player também tolera builds sem Lua (opções inexistentes) via `except`.
+
+| Teste/comando executado em Linux | Resultado | Limitação |
+| --- | --- | --- |
+| `mpv v0.41.0` (mesma versão da DLL fixada), log real com apenas `osc/ytdl/load_scripts=no` | 22 linhas `Loading lua script` | Confirma que `load-scripts=no` sozinho é insuficiente |
+| `mpv v0.41.0`, `mpv_script_options()` completo | 0 scripts Lua carregados | Confirma que o conjunto completo é necessário e suficiente |
+| `.venv/bin/python -m pytest -q tests/test_mpv_scripts.py tests/test_native.py tests/test_player.py tests/test_controller.py` | 23 passed, 0 falhas/skips | libmpv real, saída null |
+| `.venv/bin/python -m pytest -q` | 130 passed em 9,39 s, 0 falhas/skips | Loopback autorizado; sem Windows local |
+
+Os novos testes fixam a regressão: cobertura exata das nove opções no Windows simulado, `{}` preservado no Linux e comparação com motor real (conjunto mínimo deixa scripts ativos; conjunto completo não carrega nenhum). `test_mpv_scripts.py` segue verificando 12 ciclos em subprocesso com faulthandler, 24 EOF e encerramento das threads.
+
+**Próximo passo manual:** Actions → **Auralume Windows candidate** → **Run workflow** → `main`, `upload_candidate=false`. O workflow verifica primeiro scripts/ciclo de vida e depois a suíte completa. Logs verbose, diagnóstico e JUnit ficam no artifact `Auralume-windows-diagnostics-<SHA>`, inclusive após falha; exit code do pytest continua bloqueando o build. Não foi disparado workflow nesta correção.
+
+**Plano B (só se a access violation persistir sem nenhuma linha LuaJIT no log):** trocar o provedor nativo por um `libmpv-2.dll` compilado com `-Dlua=disabled -Djavascript=disabled` (comunidade confirma que é a única eliminação determinística). **NÃO TESTADO:** correção no runner Windows, EXE/ZIP desta revisão, áudio físico. Licenciamento/distribuição binária continuam com as pendências anteriores.
+
+Fontes: [LuaJIT `lj_err.c`](https://github.com/LuaJIT/LuaJIT/blob/v2.1/src/lj_err.c), [CPython 3.12.10 faulthandler](https://github.com/python/cpython/blob/v3.12.10/Modules/faulthandler.c), [python-mpv #305](https://github.com/jaseg/python-mpv/issues/305) (LuaJIT/VEH), [shinchiro #811](https://github.com/shinchiro/mpv-winbuild-cmake/issues/811) (build sem Lua), [mpv #11882](https://github.com/mpv-player/mpv/issues/11882) (crash ao destruir libmpv), [scripts embutidos](https://github.com/mpv-player/mpv/blob/492bae0768f5e826991bf9fb222fa303371e8498/player/scripting.c), [opções mpv](https://github.com/mpv-player/mpv/blob/492bae0768f5e826991bf9fb222fa303371e8498/options/options.c).
+
+O restante deste registro descreve etapas anteriores e seus estados naquele momento.
+
 Windows é o único trabalho ativo, por instrução explícita do usuário. Temas/mobile já presentes são preservados, sem desenvolvimento adicional. O workflow multiagente removido não será recriado. Execução por um único agente. Em 17/10/2026, o usuário autorizou o push dos fontes atuais para validar manualmente o porte, excluindo AGENTS.md, Registros e pacotes TAR/AppImage. Tags e releases continuam sem autorização. As referências abaixo à ausência de push e ao registro ainda vazio descrevem o estado anterior a essa autorização.
 
 ## Inventário inicial

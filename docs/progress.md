@@ -1,5 +1,9 @@
 # Progresso do Auralume
 
+## 2026-10-17 — correção definitiva da exceção nativa Windows
+
+O job `117405871883` carregou libmpv/criou o motor, mas abortou nos testes com SEH LuaJIT (`0xe24c4a02`) e access violation. A DLL fixada contém LuaJIT 2.1 e nove scripts Lua embutidos (confirmado estaticamente). `config=no`/`osc=no`/`ytdl=no`/`load-scripts=no` deixavam a maioria ativa; player e diagnóstico agora desativam **todos** os pontos de entrada Lua antes de inicializar o motor, então o LuaJIT nunca é inicializado. Verificado em Linux com `mpv v0.41.0` (mesma versão da DLL): conjunto mínimo → 22 scripts carregados; conjunto completo → 0. **130 testes aprovados no Linux**, sem skips. Revalidação Windows será manual. Plano B documentado: build sem Lua. Detalhes em [windows-build.md](windows-build.md).
+
 ## 2026-10-17 — revisão exclusiva do porte Windows
 
 Actions confirmadas com runtime Node24; o job original falhou em testes libmpv após checkout/Python bem-sucedidos. Fechamento SQLite do verificador corrigido com regressão. Suíte atual: **124 passed**; fontes isoladas Windows sem temas/mobile: **75 passed**, ambos no Linux. Patch em `dist/windows-review/windows-port.patch`. Windows nativo ainda não executado; sem push/tag/release. Pasta `Registros/` vazia, aguardando conclusão real do porte. Detalhes em [windows-build.md](windows-build.md).

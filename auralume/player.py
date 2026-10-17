@@ -5,7 +5,7 @@ import sys
 from urllib.parse import urlsplit
 
 from PySide6.QtCore import QObject, Signal
-from .native import load_mpv
+from .native import load_mpv, mpv_script_options
 
 
 class PlaybackError(RuntimeError):
@@ -30,6 +30,7 @@ class MpvPlayer(QObject):
                            keep_open=False, idle=True, volume=70, network_timeout=15)
             if audio_output:
                 options['ao'] = audio_output
+            options.update(mpv_script_options())
             self._engine = mpv.MPV(**options)
 
             @self._engine.event_callback('file-loaded')
@@ -46,7 +47,7 @@ class MpvPlayer(QObject):
                     self.ended.emit(self._active_url)
                 elif event.data.reason == mpv.MpvEventEndFile.ERROR:
                     self.error.emit('Falha ao reproduzir áudio. Confira o arquivo ou abra a origem.')
-        except (ImportError, OSError, RuntimeError, AttributeError) as error:
+        except (ImportError, OSError, RuntimeError, ValueError, AttributeError) as error:
             logging.warning('libmpv initialization failed: %s: %s', type(error).__name__, error)
             remedy = ('extraia novamente o pacote completo do Auralume, incluindo _internal/native; '
                       'consulte --diagnostics' if sys.platform == 'win32' else 'instale libmpv2 e consulte --diagnostics')

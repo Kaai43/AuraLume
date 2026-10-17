@@ -133,3 +133,21 @@ def test_windows_preserves_existing_legacy_library_without_moving_data(tmp_path)
     modern.mkdir(parents=True)
     (modern / 'library.sqlite3').write_bytes(b'newer database')
     assert default_data_dir('win32', {}, tmp_path) == modern
+
+
+def test_windows_disables_every_builtin_lua_entry_point(monkeypatch):
+    """The pinned libmpv-2.dll ships LuaJIT plus nine builtin Lua scripts."""
+    from auralume import native
+    monkeypatch.setattr(native, '_is_windows', lambda: True)
+    options = native.mpv_script_options()
+    assert set(options) == set(native._LUA_SCRIPTS)
+    assert {'osc', 'ytdl', 'load_scripts', 'load_stats_overlay', 'load_console',
+            'load_auto_profiles', 'load_select', 'load_positioning',
+            'load_commands', 'load_context_menu'} == set(options)
+    assert all(value is False for value in options.values())
+
+
+def test_linux_keeps_existing_player_options(monkeypatch):
+    from auralume import native
+    monkeypatch.setattr(native, '_is_windows', lambda: False)
+    assert native.mpv_script_options() == {}
