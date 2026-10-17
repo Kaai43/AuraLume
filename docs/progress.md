@@ -1,5 +1,17 @@
 # Progresso do Auralume
 
+## 2026-10-17 — revisão exclusiva do porte Windows
+
+Actions confirmadas com runtime Node24; o job original falhou em testes libmpv após checkout/Python bem-sucedidos. Fechamento SQLite do verificador corrigido com regressão. Suíte atual: **124 passed**; fontes isoladas Windows sem temas/mobile: **75 passed**, ambos no Linux. Patch em `dist/windows-review/windows-port.patch`. Windows nativo ainda não executado; sem push/tag/release. Pasta `Registros/` vazia, aguardando conclusão real do porte. Detalhes em [windows-build.md](windows-build.md).
+
+## 2026-10-15 — missão Windows exclusiva (substitui a sequência anterior)
+
+Por instrução nova do usuário, temas/mobile estão suspensos e preservados. Execução por um único agente; nenhuma configuração antiga restaurada. Carregamento nativo centralizado, diagnóstico real, caminhos Windows, spec e pipeline manual implementados. Regressão atual: **123 passed** no Linux; auditoria estática confirmou libmpv AMD64 e dependência obrigatória `vulkan-1.dll`. Ainda **não há EXE/ZIP Windows validado**. Build nativo, licenças/fontes correspondentes e teste em Windows limpo pendentes. Histórico abaixo permanece como registro, não como plano ativo. Ver [windows-build.md](windows-build.md).
+
+## 2026-10-15 — continuidade G0/G1
+
+Inventário e sistema de temas desktop verificados: cinco presets, editor, import/export JSON, persistência e troca sem reiniciar player. Suíte completa: **107 passed** (58 anteriores + 49 novos). Capturas claro/escuro/editor/galeria em `docs/evidence/themes/`. A missão segue G2 Flutter, G3 estabilização e só depois Windows G4/G5. Registro detalhado e limites em [continuity-2026-10.md](progress/continuity-2026-10.md); plano em [auralume-next-milestones.md](plans/auralume-next-milestones.md). Histórico anterior preservado abaixo.
+
 ## 2026-10-14 — estado inicial verificado
 
 - Lidos integralmente `AGENTS.md` e `AURALUME_WORKFLOW.md`.

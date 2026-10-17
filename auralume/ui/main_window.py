@@ -37,6 +37,8 @@ from PySide6.QtWidgets import (
 )
 
 from .widgets import CoverArt, ElidedLabel, TrackCard
+from ..themes import ThemeManager
+from ..themes.style import palette, stylesheet
 
 
 PAGES = {
@@ -76,8 +78,9 @@ class MainWindow(QMainWindow):
     source_requested = Signal(str)
     preferences_requested = Signal(str)
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None, *, theme_manager=None):
         super().__init__(parent)
+        self.theme_manager = theme_manager if theme_manager is not None else ThemeManager()
         self.setWindowTitle("Auralume — Your Music, Your Way")
         self.setMinimumSize(980, 650)
         self.resize(1240, 800)
@@ -93,17 +96,23 @@ class MainWindow(QMainWindow):
         self._duration = 0.0
         self._repeat = "off"
         self._build_shell()
+        self.theme_manager.theme_changed.connect(self.apply_theme)
+        self.apply_theme(self.theme_manager.active_theme)
         self.display_page("home")
 
-    def showEvent(self, event) -> None:  # noqa: N802 - Qt virtual method
-        super().showEvent(event)
-        # Reapply the top controls after the native window becomes visible so
-        # both Fusion and platform styles paint their foreground consistently.
-        self.page_title.setStyleSheet("color: #F4F0EA; font-size: 26px; font-weight: 750;")
-        self.search_input.setStyleSheet(
-            "color: #F4F0EA; background: #1D1A24; border: 1px solid #393541; "
-            "border-radius: 8px; padding: 9px;"
-        )
+    def apply_theme(self, theme) -> None:
+        """Update presentation in place, leaving all services and UI state alive."""
+        self.setProperty('auralumeTheme', theme)
+        self.setPalette(palette(theme))
+        self.setStyleSheet(stylesheet(theme))
+        for cover in self.findChildren(CoverArt):
+            cover.update()
+
+    def open_themes(self) -> None:
+        from .theme_dialog import ThemeGalleryDialog
+        dialog = ThemeGalleryDialog(self.theme_manager, self)
+        dialog.exec()
+        dialog.deleteLater()
 
     def _build_shell(self) -> None:
         central = QWidget(self)
@@ -138,6 +147,12 @@ class MainWindow(QMainWindow):
             button.clicked.connect(lambda checked=False, page_id=page: self._navigate(page_id))
             self.nav_buttons[page] = button
             side.addWidget(button)
+        self.themes_button = QPushButton("Temas")
+        self.themes_button.setObjectName("navButton")
+        self.themes_button.setAccessibleName("Temas")
+        self.themes_button.setToolTip("Escolher ou criar um tema")
+        self.themes_button.clicked.connect(self.open_themes)
+        side.addWidget(self.themes_button)
         side.addStretch(1)
         self.import_file_button = QPushButton("＋  Importar arquivos")
         self.import_folder_button = QPushButton("▤  Importar pasta")
@@ -184,11 +199,6 @@ class MainWindow(QMainWindow):
         body.addWidget(content_shell, 1)
         root.addWidget(self._build_player())
         self.setCentralWidget(central)
-        self.setStyleSheet(self._stylesheet())
-        self.search_input.setStyleSheet(
-            "color: #F4F0EA; background: #1D1A24; border: 1px solid #393541; "
-            "border-radius: 8px; padding: 9px;"
-        )
 
     def _build_player(self) -> QWidget:
         bar = QFrame()
@@ -356,14 +366,14 @@ class MainWindow(QMainWindow):
             layout.addWidget(hero)
             if page == "home":
                 row = QHBoxLayout()
-                for label, target, color in (
-                    ("Sua biblioteca", "library", "#D9A14A"),
-                    ("Para Você", "recommendations", "#9D78D0"),
-                    ("Seus favoritos", "favorites", "#C7788B"),
+                for label, target in (
+                    ("Sua biblioteca", "library"),
+                    ("Para Você", "recommendations"),
+                    ("Seus favoritos", "favorites"),
                 ):
                     card = QPushButton(label)
                     card.setObjectName("shortcutCard")
-                    card.setStyleSheet(f"border-left: 3px solid {color};")
+                    card.setProperty("destination", target)
                     card.clicked.connect(lambda checked=False, target=target: self._navigate(target))
                     row.addWidget(card)
                 layout.addLayout(row)
@@ -833,55 +843,3 @@ class MainWindow(QMainWindow):
         total = max(0, int(seconds))
         minutes, remainder = divmod(total, 60)
         return f"{minutes}:{remainder:02d}"
-
-    @staticmethod
-    def _stylesheet() -> str:
-        return """
-        QWidget { background: #14131A; color: #F4F0EA; font-family: 'DejaVu Sans'; font-size: 13px; }
-        QCheckBox { background: transparent; }
-        #brand, #mutedText, #pageTitle, #eyebrow, #heroTitle, #sectionTitle,
-        #cardTitle, #nowTitle, #timeLabel, #collectionTitle { background: transparent; }
-        #sidebar { background: #100F15; border-right: 1px solid #292631; }
-        #brand { color: #E7B76B; font-size: 20px; font-weight: 800; letter-spacing: 2px; }
-        #mutedText, #timeLabel { color: #A7A1B0; }
-        #navButton { text-align: left; padding: 11px 12px; border: 0; border-radius: 8px; color: #BDB7C5; background: transparent; }
-        #navButton:hover { background: #211E29; color: #FFFFFF; }
-        #navButton:checked { background: #30283A; color: #E9BE79; font-weight: 700; }
-        QPushButton { background: #25222D; border: 1px solid #393541; border-radius: 8px; padding: 8px 12px; }
-        QPushButton:hover { background: #332F3C; border-color: #62566E; }
-        QPushButton:pressed { background: #413A4A; }
-        #primaryButton, #playButton { background: #DCA756; color: #21170A; border: 0; font-weight: 800; }
-        #playButton { border-radius: 20px; min-width: 38px; max-width: 38px; min-height: 38px; max-height: 38px; padding: 0; font-size: 16px; }
-        #playerBar { background: #100F15; border-top: 1px solid #302D38; }
-        #nowTitle { font-weight: 700; }
-        #playerToggle:checked { color: #DFAE62; border-color: #84683B; }
-        #pageTitle { color: #F4F0EA; font-size: 26px; font-weight: 750; }
-        #searchInput { color: #F4F0EA; background: #1D1A24; border: 1px solid #393541; border-radius: 8px; padding: 9px; }
-        #heroPanel { background: qlineargradient(x1:0,y1:0,x2:1,y2:1, stop:0 #34283D, stop:0.55 #292637, stop:1 #423523); border: 1px solid #514453; border-radius: 16px; }
-        #eyebrow { color: #E7B76B; font-size: 10px; font-weight: 800; letter-spacing: 1.7px; }
-        #heroTitle { font-size: 24px; font-weight: 750; }
-        #sectionTitle { font-size: 12px; font-weight: 800; letter-spacing: 1.1px; color: #DAD4E0; }
-        #collectionTitle { color: #DAD4E0; font-size: 17px; font-weight: 700; background: transparent; }
-        #shortcutCard { min-height: 70px; text-align: left; font-size: 15px; font-weight: 700; background: #201D27; }
-        #trackCard { background: #1D1A24; border: 1px solid #2F2B37; border-radius: 12px; }
-        #trackCard:hover { background: #282431; border-color: #64556E; }
-        #cardTitle { font-weight: 700; }
-        #trackTable { background: transparent; alternate-background-color: #191720; border: 0; selection-background-color: #393047; }
-        #trackTable::item { padding: 8px; border-bottom: 1px solid #27242E; }
-        QHeaderView::section { background: transparent; color: #A7A1B0; border: 0; border-bottom: 1px solid #393541; padding: 9px 8px; font-size: 10px; font-weight: 800; }
-        QLineEdit, QSpinBox, QComboBox, QListWidget { background: #1D1A24; border: 1px solid #393541; border-radius: 8px; padding: 9px; selection-background-color: #5B4870; }
-        QCheckBox { spacing: 9px; }
-        QSlider::groove:horizontal { height: 4px; background: #48434F; border-radius: 2px; }
-        QSlider::sub-page:horizontal { background: #DCA756; border-radius: 2px; }
-        QSlider::handle:horizontal { width: 12px; margin: -5px 0; background: #F3D49A; border-radius: 6px; }
-        #statusLabel { padding: 8px 12px; color: #E8CA90; background: #28241E; border-radius: 7px; }
-        #statusLabel[error="true"] { color: #F0A1A1; background: #362024; }
-        #coverArt { border: 1px solid #FFFFFF22; }
-        QScrollArea { border: 0; background: transparent; }
-        QScrollBar:vertical { background: #14131A; width: 8px; margin: 0; border: 0; }
-        QScrollBar::handle:vertical { background: #51495C; min-height: 28px; border-radius: 4px; }
-        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
-        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: transparent; }
-        QMenu { background: #211E29; border: 1px solid #494352; }
-        QMenu::item:selected { background: #393047; }
-        """

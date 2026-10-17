@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "mpv": {
+    "filename": "mpv-dev-x86_64-20261015-git-492bae0768.7z",
+    "url": "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20261015/mpv-dev-x86_64-20261015-git-492bae0768.7z",
+    "sha256": "5db58c1768587b35f2d8daa11b53de4aec58197c00ea1d676f998f183a358ba8",
+    "dll_sha256": "154a1610c266563e131c328349af396dd9af693eeb049d0c04ef196324541539",
+    "source_commit": "492bae0768f5e826991bf9fb222fa303371e8498",
+    "recipe_commit": "1f8d2e76255abc48f0456d9be99b4cab9c6566e6",
+    "license_review": "GPL build; static component sources/notices still require audit"
+  },
+  "vulkan_loader": {
+    "version": "1.4.328",
+    "filename": "vulkan-loader.tar.gz",
+    "url": "https://codeload.github.com/KhronosGroup/Vulkan-Loader/tar.gz/f703f919c30c5b67958d35d40a4297cb3823ed78",
+    "sha256": "900b661788b2c5e1d094ab01437230617cb9a4a11cb133f96f4a32a9aba1c558"
+  },
+  "vulkan_headers": {
+    "version": "1.4.328",
+    "filename": "vulkan-headers.tar.gz",
+    "url": "https://codeload.github.com/KhronosGroup/Vulkan-Headers/tar.gz/9a0f3099c8a9607a7c0f3127d8abfdc19a93e8c5",
+    "sha256": "592b3ce6a64708921de3d639e4ade901596f787b041854bc50efa81f6707d709"
+  },
+  "ffmpeg_test_only": {
+    "filename": "ffmpeg-x86_64-git-ee8cbd7db.7z",
+    "url": "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20261015/ffmpeg-x86_64-git-ee8cbd7db.7z",
+    "sha256": "dc123b3ef138915c7c7b9fd1afaddce815c3163c496a5eaa63cf7945e7e475ab"
+  },
+  "system_dlls": [
+    "advapi32.dll", "avicap32.dll", "avrt.dll", "bcrypt.dll", "bcryptprimitives.dll",
+    "cfgmgr32.dll", "crypt32.dll", "d2d1.dll", "dwmapi.dll", "dwrite.dll",
+    "gdi32.dll", "imm32.dll", "iphlpapi.dll", "kernel32.dll", "normaliz.dll", "ntdll.dll",
+    "ole32.dll", "oleaut32.dll", "opengl32.dll", "secur32.dll", "setupapi.dll",
+    "shcore.dll", "shell32.dll", "shlwapi.dll", "user32.dll", "uxtheme.dll",
+    "version.dll", "winmm.dll", "wldap32.dll", "ws2_32.dll", "msvcrt.dll", "ucrtbase.dll"
+  ]
+}

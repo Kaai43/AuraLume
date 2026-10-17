@@ -1,8 +1,11 @@
 """libmpv adapter. Its event thread only emits Qt signals; widgets stay on Qt."""
 from pathlib import Path
+import logging
+import sys
 from urllib.parse import urlsplit
 
 from PySide6.QtCore import QObject, Signal
+from .native import load_mpv
 
 
 class PlaybackError(RuntimeError):
@@ -21,7 +24,7 @@ class MpvPlayer(QObject):
         self._active_url = ''
         self.initialization_error = ''
         try:
-            import mpv
+            mpv = load_mpv()
             options = dict(video=False, audio_display='no', ytdl=False, input_default_bindings=False,
                            input_vo_keyboard=False, osc=False, config=False, terminal=False,
                            keep_open=False, idle=True, volume=70, network_timeout=15)
@@ -44,7 +47,10 @@ class MpvPlayer(QObject):
                 elif event.data.reason == mpv.MpvEventEndFile.ERROR:
                     self.error.emit('Falha ao reproduzir áudio. Confira o arquivo ou abra a origem.')
         except (ImportError, OSError, RuntimeError, AttributeError) as error:
-            self.initialization_error = f'Player indisponível: instale libmpv2. ({type(error).__name__})'
+            logging.warning('libmpv initialization failed: %s: %s', type(error).__name__, error)
+            remedy = ('extraia novamente o pacote completo do Auralume, incluindo _internal/native; '
+                      'consulte --diagnostics' if sys.platform == 'win32' else 'instale libmpv2 e consulte --diagnostics')
+            self.initialization_error = f'Player indisponível: {remedy}. ({type(error).__name__})'
 
     @property
     def available(self) -> bool:

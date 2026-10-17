@@ -1,64 +1,72 @@
-name: Auralume Windows Build
+name: Auralume Windows candidate
 
 on:
   workflow_dispatch:
+    inputs:
+      upload_candidate:
+        description: Upload binaries only after license/source review and owner authorization
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   build-windows:
-    name: Build Windows x64
+    name: Test and package Windows x64
     runs-on: windows-2022
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      PYTHONUTF8: "1"
+      QT_QPA_PLATFORM: offscreen
+      AURALUME_MPV_DIR: ${{ github.workspace }}\vendor\mpv
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout selected revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
-      - name: Configure Python
-        uses: actions/setup-python@v5
+      - name: Configure Python x64
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
-          architecture: "x64"
+          architecture: x64
 
-      - name: Install project
-        shell: pwsh
+      - name: Install pinned Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .
-          python -m pip install pyinstaller pytest
+          python -m pip install -r requirements-windows.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force build/evidence | Out-Null
+          python -m pip freeze > build/evidence/python-packages.txt
 
-      - name: Run automated tests
-        shell: pwsh
-        run: |
-          python -m pytest -q
+      - name: Verify inputs and build private native dependencies
+        run: python scripts/windows_native.py > build/evidence/native-build.txt
 
-      - name: Build executable
-        shell: pwsh
-        run: |
-          python -m PyInstaller --noconfirm --clean Auralume.spec
+      - name: Load DLL and create actual playback engine
+        run: python -m auralume --diagnostics > build/evidence/source-diagnostics.json
 
-      - name: Verify executable
-        shell: pwsh
-        run: |
-          if (!(Test-Path "dist/Auralume/Auralume.exe")) {
-            throw "Auralume.exe was not generated."
-          }
+      - name: Run complete suite including real libmpv integrations
+        run: python -m pytest -q --junitxml=build/evidence/pytest-windows.xml
 
-          Get-Item "dist/Auralume/Auralume.exe" |
-            Select-Object Name, Length
+      - name: Build onedir with bundled DLLs
+        run: python -m PyInstaller --noconfirm --clean Auralume.spec
 
-      - name: Create Windows ZIP
-        shell: pwsh
-        run: |
-          Compress-Archive `
-            -Path "dist/Auralume" `
-            -DestinationPath "Auralume-0.1.0-windows-x64.zip" `
-            -Force
+      - name: Package and verify extracted EXE with generated WAV MP3 FLAC
+        run: python scripts/verify_windows.py --revision $env:GITHUB_SHA --ffmpeg .tools/windows-native/ffmpeg.exe
 
-      - name: Upload Windows executable
-        uses: actions/upload-artifact@v4
+      - name: Upload candidate for review (no GitHub Release)
+        if: ${{ inputs.upload_candidate }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: Auralume-Windows-x64
-          path: Auralume-0.1.0-windows-x64.zip
+          name: Auralume-windows-x64-candidate-${{ github.sha }}
+          path: |
+            dist/windows-candidate/
+            build/evidence/
           if-no-files-found: error
+          retention-days: 14

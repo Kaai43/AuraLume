@@ -62,14 +62,23 @@ class CoverArt(QFrame):
             painter.setClipPath(path)
             painter.drawPixmap(self.rect(), self._pixmap)
             return
+        # Resolve from the current parent tree at paint time: newly created
+        # cards and existing player artwork obey the same live theme.
+        from ..themes import get_presets
+        ancestor = self
+        theme = None
+        while ancestor is not None and theme is None:
+            theme = ancestor.property('auralumeTheme')
+            ancestor = ancestor.parentWidget()
+        colors = (theme if theme is not None else get_presets()[0]).colors
         gradient = QLinearGradient(0, 0, self.width(), self.height())
-        gradient.setColorAt(0.0, QColor("#7548A8"))
-        gradient.setColorAt(0.55, QColor("#3F497E"))
-        gradient.setColorAt(1.0, QColor("#D79444"))
+        gradient.setColorAt(0.0, QColor(colors['cover_start']))
+        gradient.setColorAt(0.55, QColor(colors['cover_middle']))
+        gradient.setColorAt(1.0, QColor(colors['cover_end']))
         painter.setBrush(QBrush(gradient))
         painter.setPen(Qt.PenStyle.NoPen)
         painter.drawRoundedRect(self.rect(), 10, 10)
-        painter.setPen(QColor("#FFF5E4"))
+        painter.setPen(QColor(colors['cover_foreground']))
         painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, "♪")
 
 

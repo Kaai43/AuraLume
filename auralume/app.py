@@ -28,8 +28,9 @@ def main(argv=None):
         parser.error('Use uma origem autorizada ou arquivos locais por invocação.')
     if args.diagnostics:
         from .diagnostics import environment_report
-        print(json.dumps(environment_report(), ensure_ascii=False))
-        return 0
+        report = environment_report()
+        print(json.dumps(report, ensure_ascii=True))
+        return 0 if report['native_mpv']['engine_created'] and not report['native_mpv']['error'] else 1
     if args.smoke_test:
         os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
     from PySide6.QtCore import QTimer
@@ -39,17 +40,17 @@ def main(argv=None):
     from .database import Database
     from .player import MpvPlayer
     from .ui.main_window import MainWindow
+    from .themes import ThemeManager
+    from .paths import default_data_dir, resource_path
 
     app = QApplication.instance() or QApplication([sys.argv[0]])
     app.setApplicationName('Auralume')
     app.setOrganizationName('Auralume')
     app.setApplicationVersion(__version__)
     app.setFont(QFont('DejaVu Sans', 10))
-    icon_dir = Path(sys.executable).parent if getattr(sys, 'frozen', False) else Path(__file__).resolve().parent.parent / 'packaging'
-    app.setWindowIcon(QIcon(str(icon_dir / 'auralume.svg')))
+    app.setWindowIcon(QIcon(str(resource_path('auralume.svg'))))
     temporary = tempfile.TemporaryDirectory(prefix='auralume-smoke-') if args.smoke_test and not args.data_dir else None
-    data_dir = args.data_dir or (Path(temporary.name) if temporary else
-                                Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share')) / 'Auralume')
+    data_dir = args.data_dir or (Path(temporary.name) if temporary else default_data_dir())
     try:
         data_dir.mkdir(parents=True, exist_ok=True)
         handler = RotatingFileHandler(data_dir / 'auralume.log', maxBytes=500_000, backupCount=2)
@@ -59,14 +60,17 @@ def main(argv=None):
     except Exception as error:
         message = f'Não foi possível abrir os dados locais: {error}'
         if args.smoke_test:
-            print(json.dumps({'ok': False, 'error': message}, ensure_ascii=False))
+            print(json.dumps({'ok': False, 'error': message}, ensure_ascii=True))
         else:
             QMessageBox.critical(None, 'Auralume', message)
         return 1
 
-    window = MainWindow()
+    theme_manager = ThemeManager(database)
+    window = MainWindow(theme_manager=theme_manager)
     player = MpvPlayer(audio_output=args.audio_output or ('null' if args.smoke_test else None))
     controller = Controller(window, database, player)
+    if theme_manager.warning:
+        window.set_status(theme_manager.warning)
     old_hook = sys.excepthook
     unhandled_errors = []
 
@@ -103,7 +107,7 @@ def main(argv=None):
                 print(json.dumps({'ok': bool(ok), 'tracks': len(database.list_tracks()),
                                   'history': len(database.history()), 'player_available': player.available,
                                   'playback_started': controller._loaded,
-                                  'error': controller.last_error}, ensure_ascii=False), flush=True)
+                                  'error': controller.last_error}, ensure_ascii=True), flush=True)
                 result_code[0] = 0 if ok else 1
                 app.quit()
         monitor.timeout.connect(verify)

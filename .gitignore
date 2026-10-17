@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.pyo
 .venv/
+.tools/
 venv/
 .pytest_cache/
 .mypy_cache/
@@ -51,3 +52,15 @@ AppDir/
 # Pacotes de distribuição
 Auralume-*.tar.gz
 Auralume-*-windows-*.zip
+
+# Downloaded/built native Windows dependencies (pinned in packaging/windows)
+vendor/mpv/
+
+# Exclusões solicitadas para publicação do código-fonte
+[Aa][Gg][Ee][Nn][Tt][Ss].md
+[Rr][Ee][Gg][Ii][Ss][Tt][Rr][Oo][Ss]/
+[Rr][Ee][Gg][Ss][Ii][Tt][Rr][Oo][Ss]/
+*.[Tt][Aa][Rr]
+*.[Tt][Aa][Rr].[Gg][Zz]
+*.[Tt][Aa][Rr].[Xx][Zz]
+*.[Aa][Pp][Pp][Ii][Mm][Aa][Gg][Ee]

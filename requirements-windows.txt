@@ -1,0 +1,5 @@
+# Runtime versions follow the existing lock; extra build/test requirements are Windows-only.
+-r requirements-lock.txt
+pefile==2024.8.26
+pywin32-ctypes==0.2.3
+colorama==0.4.6

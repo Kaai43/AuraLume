@@ -1,0 +1,47 @@
+{
+  "qt_platform": "offscreen",
+  "artifacts": [
+    {
+      "file": "docs/evidence/themes/auralume-original-1240x800.png",
+      "width": 1240,
+      "height": 800
+    },
+    {
+      "file": "docs/evidence/themes/auralume-original-980x650.png",
+      "width": 980,
+      "height": 650
+    },
+    {
+      "file": "docs/evidence/themes/auralume-original-gallery.png",
+      "width": 980,
+      "height": 650
+    },
+    {
+      "file": "docs/evidence/themes/auralume-original-editor.png",
+      "width": 980,
+      "height": 650
+    },
+    {
+      "file": "docs/evidence/themes/soft-daylight-1240x800.png",
+      "width": 1240,
+      "height": 800
+    },
+    {
+      "file": "docs/evidence/themes/soft-daylight-980x650.png",
+      "width": 980,
+      "height": 650
+    },
+    {
+      "file": "docs/evidence/themes/soft-daylight-gallery.png",
+      "width": 980,
+      "height": 650
+    },
+    {
+      "file": "docs/evidence/themes/soft-daylight-editor.png",
+      "width": 980,
+      "height": 650
+    }
+  ],
+  "physical_audio_tested": false,
+  "user_data_opened": false
+}

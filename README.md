@@ -50,3 +50,7 @@ Evidências e próximos passos: [progresso](docs/progress.md), [próxima tarefa]
 Código original do Auralume: GPL-3.0-or-later, texto em `LICENSE`. Dependências mantêm suas licenças; veja `packaging/licenses/` no código-fonte ou `_internal/licenses/` no executável. A opção onedir mantém bibliotecas Qt substituíveis. O código-fonte acompanha o projeto e o arquivo `Auralume-0.1.0-source.tar.gz`; nenhuma publicação é feita automaticamente. Conteúdo musical não está incluído e continua sujeito à autorização de sua origem.
 
 Referências de implementação: [API Python do yt-dlp](https://github.com/yt-dlp/yt-dlp#embedding-yt-dlp), [manual mpv](https://mpv.io/manual/stable/), [Qt for Python](https://doc.qt.io/qtforpython-6/), [PyInstaller](https://pyinstaller.org/en/stable/usage.html). Design e código do Auralume são independentes; nenhum recurso proprietário do Spotify foi reutilizado.
+
+## Windows x64 — preparação em andamento
+
+O porte possui carregamento privado de DLLs, diagnósticos e um pipeline manual de build/testes. **Ainda não há pacote Windows validado nesta sessão.** Instruções, dependências fixadas e limitações: [docs/windows-build.md](docs/windows-build.md). Nenhuma release é publicada automaticamente; revisão de licenças e aprovação do responsável são necessárias antes de distribuir binários.

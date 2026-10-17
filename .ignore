@@ -1,0 +1,9 @@
+node_modules/
+vendor/
+.git/
+dist/
+build/
+*.log
+*.lock
+package-lock.json
+*.min.js
