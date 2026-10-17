@@ -4,11 +4,11 @@ A missão Windows substitui as prioridades históricas abaixo. Trabalhar com um 
 
 1. Ler a investigação da exceção nativa no início de `docs/windows-build.md`. Causa: LuaJIT + scripts embutidos na DLL fixada. O patch isolado antigo em `dist/windows-review/` não inclui esta correção.
 2. Em 17/10/2026, o usuário autorizou enviar os fontes atuais para `main`, incluindo os trabalhos existentes, excluindo AGENTS.md, Registros e pacotes de distribuição. A validação Windows será acionada manualmente pelo usuário: Actions → Auralume Windows candidate → Run workflow, com `upload_candidate=false` enquanto a revisão de licenças estiver pendente.
-3. Conferir primeiro os testes de scripts/ciclos do player e depois a suíte inteira, onedir e ZIP. Se persistir access violation **sem nenhuma linha LuaJIT no log**, seguir o plano B (build `-Dlua=disabled`) e coletar a pilha nativa antes de outra alteração. Não declarar Windows validado antes disso.
+3. (Concluído em 17/10/2026) Runner Windows: run [39040026125](https://github.com/Kaai43/Auralume/actions/runs/39040026125) — suíte 130 passed, motor `mpv v0.41.0` sem LuaJIT/access violation, onedir e EXE/ZIP extraídos aprovados. Pendente apenas teste auditivo/manual em Windows 10/11. Plano B (build `-Dlua=disabled`) não foi necessário.
 4. Concluir inventário/licenças/fontes correspondentes de libmpv/FFmpeg/Qt antes de habilitar upload de binários. Depois, obter autorização específica para disponibilizar o candidato.
 5. Testar em Windows 10/11 limpo, áudio audível, dispositivos e SmartScreen; revisar o rascunho `docs/windows-release-notes.md`. Publicação exige outra aprovação explícita.
 
-Última regressão: `130 passed`, 0 falhas/ignorados no Linux (17/10/2026), incluindo regressões da inicialização/ciclo de vida nativo e da cobertura das opções Lua. O registro local permanece ignorado pelo Git. Tags e releases continuam sem autorização. A existência dos fontes mobile não significa que o aplicativo mobile esteja pronto.
+Última regressão: `130 passed` no Windows (13,10 s) e no Linux (17/10/2026), incluindo regressões da inicialização/ciclo de vida nativo e da cobertura das opções Lua. O registro local permanece ignorado pelo Git. Tags e releases continuam sem autorização. A existência dos fontes mobile não significa que o aplicativo mobile esteja pronto.
 
 ## Registro histórico anterior (não executar como prioridade atual)
 

@@ -1,8 +1,8 @@
 # Progresso do Auralume
 
-## 2026-10-17 — correção definitiva da exceção nativa Windows
+## 2026-10-17 — Windows validado no runner (exceção nativa resolvida)
 
-O job `117405871883` carregou libmpv/criou o motor, mas abortou nos testes com SEH LuaJIT (`0xe24c4a02`) e access violation. A DLL fixada contém LuaJIT 2.1 e nove scripts Lua embutidos (confirmado estaticamente). `config=no`/`osc=no`/`ytdl=no`/`load-scripts=no` deixavam a maioria ativa; player e diagnóstico agora desativam **todos** os pontos de entrada Lua antes de inicializar o motor, então o LuaJIT nunca é inicializado. Verificado em Linux com `mpv v0.41.0` (mesma versão da DLL): conjunto mínimo → 22 scripts carregados; conjunto completo → 0. **130 testes aprovados no Linux**, sem skips. Revalidação Windows será manual. Plano B documentado: build sem Lua. Detalhes em [windows-build.md](windows-build.md).
+A DLL fixada contém LuaJIT 2.1 e nove scripts Lua embutidos (confirmado estaticamente). `config=no`/`osc=no`/`ytdl=no`/`load-scripts=no` deixavam a maioria ativa; player e diagnóstico agora desativam **todos** os pontos de entrada Lua antes de inicializar o motor, então o LuaJIT nunca é inicializado e o SEH `0xe24c4a02` (que terminava em access violation) não dispara. Verificado em Linux com `mpv v0.41.0` (mesma versão da DLL): conjunto mínimo → 22 scripts carregados; conjunto completo → 0. **Run [39040026125](https://github.com/Kaai43/Auralume/actions/runs/39040026125): suíte 130 passed em 13,10 s, motor `mpv v0.41.0` criado, onedir e EXE/ZIP extraídos aprovados (WAV/MP3/FLAC `ao=null`, persistência, DLL ausente rejeitada), sem LuaJIT/access violation.** O verificador passou a resolver o diretório extraído antes de comparar caminhos canônicos. Falta apenas teste auditivo/manual em Windows 10/11 e o inventário de licenças. Detalhes em [windows-build.md](windows-build.md).
 
 ## 2026-10-17 — revisão exclusiva do porte Windows
 
