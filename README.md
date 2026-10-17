@@ -30,11 +30,11 @@ Suggestions based on your library.	Playlists that feel like yours.
 
 You'll also find a searchable library, favorites, listening history, and a persistent player bar. These screenshots show the early 0.1.0 interface; there's more to come.
 Download Auralume
-Version 0.1.0 is available for Linux. It's an early release, and wider compatibility work is still underway.
-Get the first public release →
+Version 0.1.1 is available for Linux x86-64 and Windows x64. It's an early release, and wider compatibility work is still underway.
+Get the latest release →
 Platform	Status	Download
 Linux x86-64	Available; initially tested on Ubuntu 26.04.1	AppImage · tar.gz
-Windows x64	In development; no verified release yet	Coming later
+Windows x64	Available; verified on Windows Server 2022 (bundled runtime)	Auralume-0.1.1-windows-x64.zip
 
 
 Run the AppImage on Linux
@@ -45,6 +45,9 @@ On systems where AppImage launch fails due to missing FUSE support, you can try:
 APPIMAGE_EXTRACT_AND_RUN=1 ./Auralume-0.1.0-x86_64.AppImage
 Prefer the tar.gz archive? Extract it and run the included Auralume executable, keeping the _internal/ directory beside it. The packaged app doesn't require a separate Python installation.
 Compatibility note: The original Linux build was verified on Ubuntu 26.04.1 x86-64, not on every Linux distribution. Depending on your system and package format, you may need native libmpv2 and graphical libraries. Original automated audio tests used null audio output; physical speakers/headphones were not separately validated.
+
+Run on Windows
+Download `Auralume-0.1.1-windows-x64.zip`, extract the whole folder, and run `Auralume.exe`. Keep `Auralume.exe` together with the bundled `_internal/` directory, which contains the mpv runtime, the Vulkan loader, and the Qt libraries. No separate Python installation is required. The executable is unsigned, so Windows SmartScreen may show a warning.
 
 Build it yourself
 Auralume is made with Python 3.12+, PySide6 / Qt 6, libmpv, SQLite, Mutagen, and yt-dlp for explicitly authorized external sources.

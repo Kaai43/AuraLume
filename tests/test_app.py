@@ -11,7 +11,7 @@ def test_diagnostics_does_not_require_display_or_create_user_data(tmp_path):
                             env={**os.environ, 'XDG_DATA_HOME': str(tmp_path), 'LOCALAPPDATA': str(tmp_path)})
     assert result.returncode == 0, result.stderr
     report = json.loads(result.stdout)
-    assert report['auralume'] == '0.1.0'
+    assert report['auralume'] == '0.1.1'
     assert report['libmpv']
     assert report['native_mpv']['loaded'] is True
     assert report['native_mpv']['engine_created'] is True
