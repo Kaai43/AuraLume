@@ -118,21 +118,24 @@ def main():
                 zipped.write(bundle / item['path'], 'Auralume/' + item['path'])
         extracted = root / 'Pacote extraído ç'
         extract_package(archive, extracted)
-        relocated = extracted / 'Auralume'
+        relocated = (extracted / 'Auralume').resolve()
         if inventory(relocated) != entries:
             raise RuntimeError('ZIP extraction changed package contents')
         binary = relocated / 'Auralume.exe'
         diagnostic = invoke(binary, environment, cwd, '--diagnostics')
         native = diagnostic['native_mpv']
+        report['checks']['diagnostics'] = diagnostic
         if not diagnostic['frozen'] or not native['engine_created'] or native['error']:
             raise RuntimeError(f'Extracted engine unavailable: {diagnostic}')
-        if not Path(native['path']).resolve().is_relative_to(relocated):
-            raise RuntimeError('Loaded libmpv outside extracted package')
-        if not Path(native['loaded_dependencies']['vulkan-1.dll']).resolve().is_relative_to(relocated):
-            raise RuntimeError('Vulkan came from the host instead of the extracted package')
+        loaded_libmpv = Path(native['path']).resolve()
+        if not loaded_libmpv.is_relative_to(relocated):
+            raise RuntimeError(f'Loaded libmpv outside extracted package: {loaded_libmpv} not under {relocated}')
+        loaded_vulkan = Path(native['loaded_dependencies']['vulkan-1.dll']).resolve()
+        if not loaded_vulkan.is_relative_to(relocated):
+            raise RuntimeError(f'Vulkan came from the host instead of the extracted package: '
+                               f'{loaded_vulkan} not under {relocated}')
         if (root / 'Dados pessoais').exists() or (root / 'XDG').exists():
             raise RuntimeError('Diagnostics created personal data')
-        report['checks']['diagnostics'] = diagnostic
         wav_path = root / 'João - Canção própria.wav'
         write_wav(wav_path)
         paths = [wav_path]
